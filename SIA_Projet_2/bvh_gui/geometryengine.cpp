@@ -134,10 +134,14 @@ void GeometryEngine::getSkinPos(Joint *jnt, std::vector<VertexData> &vec){
         parent = parent->parent;
     }
 
+    //qDebug() << 0 *transform* vec[0].position;
+
     for (int i = 0; i < vec.size(); i++){
-        if (weightList[i][jnt->_name] != 0){
+        if(weightList[i][jnt->_name] != 0)
             vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
-        }
+        //std::cout << "WEIGHT : " << weightList[i][jnt->_name] << std::endl;
+        //std::cout << "TRANSFORM : " << isnan(transform) << std::endl;
+        //std::cout << "POS : " << vec[i].position.x() << " " << vec[i].position.y() << " " << vec[i].position.z() << std::endl;
     }
 
     if(!(jnt->_children.empty())){
@@ -239,8 +243,17 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     setWeights(p.first);
 
     skinPos = p.first;
-    getSkinPos(root, skinPos);
-    copyVector(skinPos, skinPosCopy);
+    qDebug() << skinPos[0].position;
+    std::vector<VertexData> newPos;
+    for(int i = 0 ; i < skinPos.size() ; i++){
+        VertexData newVert = {skinPos[i].position + QVector3D(root->_offX, root->_offY, root->_offZ), QVector2D(0.0f, 0.0f)};
+        newPos.push_back(newVert);
+    }
+    p.first = newPos;
+    skinPos = p.first;
+    qDebug() << skinPos[0].position;
+    std::vector<VertexData> tmpSkinPos(skinPos);
+    skinPosCopy = tmpSkinPos;
     
     VertexData *vertices = &(p.first[0]);
     GLushort *indices = &(p.second[0]);
@@ -269,7 +282,13 @@ void GeometryEngine::updatePos(Joint *root){
     arrayBuf.allocate(vertices, lenVec * sizeof(VertexData));
 }
 
+void GeometryEngine::resetSkinPos(){
+    std::vector<VertexData> tmpSkinPos(skinPosCopy);
+    skinPos = tmpSkinPos;
+}
+
 void GeometryEngine::updateSkinPos(Joint *root){
+    resetSkinPos();
     getSkinPos(root, skinPos);
     std::cout << skinPos[0].position.x() << std::endl;
     VertexData *vertices = &skinPos[0];
