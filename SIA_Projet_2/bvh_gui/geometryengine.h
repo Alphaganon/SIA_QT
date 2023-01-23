@@ -34,11 +34,12 @@ public:
 private:
     void getPos(Joint *jnt, std::vector<VertexData> *vec);
     void getSkinPos(Joint *jnt, std::vector<VertexData> &vec);
+    void copyVector(std::vector<VertexData> vecToCopy, std::vector<VertexData> &copiedVec);
     void setIndexes(Joint *jnt, std::vector<GLushort> *vec);
     void setJointIndexes(Joint *jnt, int &vertexIndex);
     void initCubeGeometry();
     void initLineGeometry(Joint *root);
-    void initSkinGeometry();
+    void initSkinGeometry(Joint *root);
     void setWeights(std::vector<VertexData> vec);
 
     QOpenGLBuffer arrayBuf;

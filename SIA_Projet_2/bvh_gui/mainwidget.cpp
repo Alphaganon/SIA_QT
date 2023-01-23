@@ -40,11 +40,10 @@ void MainWidget::mousePressEvent(QMouseEvent *e)
     mousePressPosition = QVector2D(e->pos());
 }
 
-void MainWidget::mouseReleaseEvent(QMouseEvent *e)
-{
+void MainWidget::mouseMoveEvent(QMouseEvent *e){
     // Mouse release position - mouse press position
     QVector2D diff = QVector2D(e->pos()) - mousePressPosition;
-
+    
     // Rotation axis is perpendicular to the mouse position difference
     // vector
     QVector3D n = QVector3D(diff.y(), diff.x(), 0.0).normalized();
@@ -57,8 +56,21 @@ void MainWidget::mouseReleaseEvent(QMouseEvent *e)
 
     // Increase angular speed
     angularSpeed += acc;
+    // qDebug() << angularSpeed;
+    if (angularSpeed >= 6){
+        angularSpeed = 6;
+    }
 }
 //! [0]
+
+void MainWidget::wheelEvent(QWheelEvent * e){
+    QPoint angleDelta = e->angleDelta() / 8;
+    if (!angleDelta.isNull()) {
+        zoomOffset += angleDelta.y();
+        zooming = true;
+    }
+    e->accept();
+}
 
 //! [1]
 void MainWidget::timerEvent(QTimerEvent *)
@@ -67,10 +79,11 @@ void MainWidget::timerEvent(QTimerEvent *)
     angularSpeed *= 0.95;
 
     // Stop rotation when speed goes below threshold
-    if (angularSpeed < 0.01) {
+    if (angularSpeed < 0.01 && !zooming) {
         angularSpeed = 0.0;
     } else {
         // Update rotation
+        zooming = false;
         rotation = QQuaternion::fromAxisAndAngle(rotationAxis, angularSpeed) * rotation;
 
         // Request an update
@@ -168,7 +181,7 @@ void MainWidget::paintGL()
 //! [6]
     // Calculate model view transformation
     QMatrix4x4 matrix;
-    matrix.translate(-80, -200, -1000.0);
+    matrix.translate(0, -200, -1000.0 + zoomOffset);
     matrix.rotate(rotation);
 
     // Set modelview-projection matrix
@@ -187,16 +200,16 @@ void MainWidget::paintGL()
 void MainWidget::motionEvent(QTimerEvent* e) {
     auto time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = std::chrono::duration_cast<std::chrono::duration<double>>(time - startTime);
-    if (elapsed.count()/interval >= currFrame + 1){
-        std::cout << currFrame << std::endl;
-        root->animate(currFrame);
-        // geometries->updatePos(root);
-        geometries->updateSkinPos(root);
-        currFrame++;
-        update();
-        if (currFrame>=nFrames) {
-            currFrame = 0;
-            startTime = std::chrono::high_resolution_clock::now();
-        }
-    }
+    // if (elapsed.count()/interval >= currFrame + 1){
+    //     std::cout << currFrame << std::endl;
+    //     root->animate(currFrame);
+    //     // geometries->updatePos(root);
+    //     geometries->updateSkinPos(root);
+    //     currFrame++;
+    //     update();
+    //     if (currFrame>=nFrames) {
+    //         currFrame = 0;
+    //         startTime = std::chrono::high_resolution_clock::now();
+    //     }
+    // }
 }

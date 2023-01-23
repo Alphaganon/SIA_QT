@@ -21,7 +21,7 @@ GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec)
     //initCubeGeometry();
     // initLineGeometry(root);
     this->jntVec = jntVec;
-    initSkinGeometry();
+    initSkinGeometry(root);
 }
 
 GeometryEngine::~GeometryEngine()
@@ -101,6 +101,14 @@ void GeometryEngine::initCubeGeometry()
 //! [1]
 }
 
+void GeometryEngine::copyVector(std::vector<VertexData> vecToCopy, std::vector<VertexData> &copiedVec){
+    for(VertexData data : vecToCopy){
+        QVector3D pos(data.position.x(), data.position.y(), data.position.z());
+        QVector2D tex(data.texCoord.x(), data.texCoord.y());
+        copiedVec.push_back({pos, tex});
+    }
+}
+
 void GeometryEngine::getPos(Joint *jnt, std::vector<VertexData> *vec){
     QMatrix4x4 transform = *(jnt->_transform);
     Joint * parent = jnt->parent;
@@ -127,7 +135,9 @@ void GeometryEngine::getSkinPos(Joint *jnt, std::vector<VertexData> &vec){
     }
 
     for (int i = 0; i < vec.size(); i++){
-        vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
+        if (weightList[i][jnt->_name] != 0){
+            vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
+        }
     }
 
     if(!(jnt->_children.empty())){
@@ -220,18 +230,19 @@ void GeometryEngine::initLineGeometry(Joint *root)
     lenIndexes = lenIdx;
 }
 
-void GeometryEngine::initSkinGeometry()
+void GeometryEngine::initSkinGeometry(Joint *root)
 {
     std::string filename = "../skin.off";
     std::pair<std::vector<VertexData>, std::vector<unsigned short>> p = parseVertex(filename);
     int lenVec = p.first.size();
     int lenIdx = p.second.size();
+    setWeights(p.first);
 
     skinPos = p.first;
-    skinPosCopy = p.first;
+    getSkinPos(root, skinPos);
+    copyVector(skinPos, skinPosCopy);
     
     VertexData *vertices = &(p.first[0]);
-    setWeights(p.first);
     GLushort *indices = &(p.second[0]);
 
     // Transfer vertex data to VBO 0
@@ -247,7 +258,7 @@ void GeometryEngine::initSkinGeometry()
 }
 
 void GeometryEngine::updatePos(Joint *root){
-    std::vector<VertexData> vec; 
+    std::vector<VertexData> vec;
     getPos(root, &vec);
     VertexData *vertices = &vec[0];
     int lenVec = vec.size();

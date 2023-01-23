@@ -40,7 +40,8 @@ public:
 
 protected:
     void mousePressEvent(QMouseEvent *e) override;
-    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void wheelEvent(QWheelEvent * e) override;
     void timerEvent(QTimerEvent *e) override;
     void motionEvent(QTimerEvent* e);
 
@@ -59,6 +60,8 @@ private:
     QOpenGLTexture *texture = nullptr;
 
     QMatrix4x4 projection;
+    float zoomOffset;
+    bool zooming = false;
 
     QVector2D mousePressPosition;
     QVector3D rotationAxis;
