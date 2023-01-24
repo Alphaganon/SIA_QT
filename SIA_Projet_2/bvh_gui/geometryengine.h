@@ -42,6 +42,7 @@ private:
     void initSkinGeometry(Joint *root);
     void setWeights(std::vector<VertexData> vec);
     void resetSkinPos();
+    void parseWeights(std::string fileName);
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;

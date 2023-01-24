@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
 
 #include "geometryengine.h"
+#include "../super_parser.h"
 
 #include <QVector2D>
 #include <QVector3D>
@@ -19,7 +20,7 @@ GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec)
 
     // Initializes cube geometry and transfers it to VBOs
     //initCubeGeometry();
-    // initLineGeometry(root);
+    //initLineGeometry(root);
     this->jntVec = jntVec;
     initSkinGeometry(root);
 }
@@ -134,14 +135,11 @@ void GeometryEngine::getSkinPos(Joint *jnt, std::vector<VertexData> &vec){
         parent = parent->parent;
     }
 
-    //qDebug() << 0 *transform* vec[0].position;
-
     for (int i = 0; i < vec.size(); i++){
-        if(weightList[i][jnt->_name] != 0)
+        //std::cout << jnt->_name << " : " << weightList[i][jnt->_name] << std::endl;
+        if(weightList[i][jnt->_name] != 0){
             vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
-        //std::cout << "WEIGHT : " << weightList[i][jnt->_name] << std::endl;
-        //std::cout << "TRANSFORM : " << isnan(transform) << std::endl;
-        //std::cout << "POS : " << vec[i].position.x() << " " << vec[i].position.y() << " " << vec[i].position.z() << std::endl;
+        }
     }
 
     if(!(jnt->_children.empty())){
@@ -179,7 +177,35 @@ void GeometryEngine::setWeights(std::vector<VertexData> vec){
             }
         }
         weights[closestJoint] = 1.0;
+        std::cout << "JOINT : " << closestJoint << " DIST : " << closestDist << std::endl;
         weightList.push_back(weights);
+    }
+}
+
+void GeometryEngine::parseWeights(std::string fileName){
+    std::ifstream inputfile(fileName.data());
+    if(inputfile.good()){
+        bool idsFound = false;
+        std::vector<std::string> ids;
+        while(!inputfile.eof()) {
+            std::setlocale(LC_ALL, "en_US.UTF-8");
+            std::string buf;
+			std::getline(inputfile, buf);
+            std::vector<std::string> tokens = multiParser(buf, " \t\r");
+            if(!idsFound){
+                for(int i = 1 ; i < tokens.size() ; i++){
+                    ids.push_back(tokens[i]);
+                }
+                idsFound = true;
+                continue;
+            }
+            std::unordered_map<std::string, float> weights;
+            for(int i = 1 ; i < tokens.size() ; i++){
+                weights[ids[i-1]] = stof(tokens[i]);
+                std::cout << "WEIGHT : " << ids[i-1] << std::endl;
+            }
+            weightList.push_back(weights);
+        }
     }
 }
 
@@ -240,10 +266,9 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     std::pair<std::vector<VertexData>, std::vector<unsigned short>> p = parseVertex(filename);
     int lenVec = p.first.size();
     int lenIdx = p.second.size();
-    setWeights(p.first);
 
     skinPos = p.first;
-    qDebug() << skinPos[0].position;
+    //qDebug() << skinPos[0].position;
     std::vector<VertexData> newPos;
     for(int i = 0 ; i < skinPos.size() ; i++){
         VertexData newVert = {skinPos[i].position + QVector3D(root->_offX, root->_offY, root->_offZ), QVector2D(0.0f, 0.0f)};
@@ -251,7 +276,9 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     }
     p.first = newPos;
     skinPos = p.first;
-    qDebug() << skinPos[0].position;
+    //setWeights(skinPos);
+    parseWeights("../weights.txt");
+    //qDebug() << skinPos[0].position;
     std::vector<VertexData> tmpSkinPos(skinPos);
     skinPosCopy = tmpSkinPos;
     
