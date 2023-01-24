@@ -136,9 +136,15 @@ void GeometryEngine::getSkinPos(Joint *jnt, std::vector<VertexData> &vec){
 
     //qDebug() << 0 *transform* vec[0].position;
 
-    for (int i = 0; i < vec.size(); i++){
-        if(weightList[i][jnt->_name] != 0)
-            vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
+
+    for (int i = 0; i < skinPos.size(); i++){
+        QVector4D pos(skinPos[i].position.x(), skinPos[i].position.y(), skinPos[i].position.z(), 1);
+        QVector4D res;
+        if(weightList[i][jnt->_name] != 0){
+            res = weightList[i][jnt->_name] * (transform * pos);
+        }
+        vec[i].position += QVector3D(res.x(), res.y(), res.z());
+
         //std::cout << "WEIGHT : " << weightList[i][jnt->_name] << std::endl;
         //std::cout << "TRANSFORM : " << isnan(transform) << std::endl;
         //std::cout << "POS : " << vec[i].position.x() << " " << vec[i].position.y() << " " << vec[i].position.z() << std::endl;
@@ -240,20 +246,18 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     std::pair<std::vector<VertexData>, std::vector<unsigned short>> p = parseVertex(filename);
     int lenVec = p.first.size();
     int lenIdx = p.second.size();
-    setWeights(p.first);
 
     skinPos = p.first;
-    qDebug() << skinPos[0].position;
     std::vector<VertexData> newPos;
     for(int i = 0 ; i < skinPos.size() ; i++){
         VertexData newVert = {skinPos[i].position + QVector3D(root->_offX, root->_offY, root->_offZ), QVector2D(0.0f, 0.0f)};
         newPos.push_back(newVert);
     }
-    p.first = newPos;
-    skinPos = p.first;
-    qDebug() << skinPos[0].position;
-    std::vector<VertexData> tmpSkinPos(skinPos);
-    skinPosCopy = tmpSkinPos;
+    skinPosCopy = newPos;
+
+    setWeights(p.first);
+    // std::vector<VertexData> tmpSkinPos(skinPos);
+    // skinPosCopy = tmpSkinPos;
     
     VertexData *vertices = &(p.first[0]);
     GLushort *indices = &(p.second[0]);
@@ -288,11 +292,15 @@ void GeometryEngine::resetSkinPos(){
 }
 
 void GeometryEngine::updateSkinPos(Joint *root){
-    resetSkinPos();
-    getSkinPos(root, skinPos);
-    std::cout << skinPos[0].position.x() << std::endl;
-    VertexData *vertices = &skinPos[0];
-    int lenVec = skinPos.size();
+    // resetSkinPos();
+
+    for (int i = 0; i< skinPosCopy.size(); i++){
+        skinPosCopy[i].position = QVector3D(0, 0, 0);
+    }
+    getSkinPos(root, skinPosCopy);
+    // std::cout << skinPos[0].position.x() << std::endl;
+    VertexData *vertices = &skinPosCopy[0];
+    int lenVec = skinPosCopy.size();
     // Transfer vertex data to VBO 0
     arrayBuf.destroy();
     arrayBuf.create(); 
