@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     app.setApplicationName("Tpose");
     app.setApplicationVersion("0.1");
 #ifndef QT_NO_OPENGL
-    std::string fileName = "walk1.bvh";
+    std::string fileName = "walkSit.bvh";
     MainWidget* widget = new MainWidget(fileName);
     widget->show();
 #else

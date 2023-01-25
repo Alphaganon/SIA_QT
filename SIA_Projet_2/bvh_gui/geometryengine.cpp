@@ -135,27 +135,13 @@ void GeometryEngine::getSkinPos(Joint *jnt, std::vector<VertexData> &vec){
         parent = parent->parent;
     }
 
-    //qDebug() << 0 *transform* vec[0].position;
-
-
     for (int i = 0; i < skinPos.size(); i++){
-        QVector4D pos(skinPos[i].position.x(), skinPos[i].position.y(), skinPos[i].position.z(), 1);
-        QVector4D res;
         if(weightList[i][jnt->_name] != 0){
-            res = weightList[i][jnt->_name] * (transform * pos);
+            QVector4D pos(skinPos[i].position.x(), skinPos[i].position.y(), skinPos[i].position.z(), 1);
+            QVector4D res = weightList[i][jnt->_name] * (transform * (*(jnt->_restTransform) * pos));
+            vec[i].position += QVector3D(res.x(), res.y(), res.z());
         }
-        vec[i].position += QVector3D(res.x(), res.y(), res.z());
-
-        //std::cout << "WEIGHT : " << weightList[i][jnt->_name] << std::endl;
-        //std::cout << "TRANSFORM : " << isnan(transform) << std::endl;
-        //std::cout << "POS : " << vec[i].position.x() << " " << vec[i].position.y() << " " << vec[i].position.z() << std::endl;
     }
-    // for (int i = 0; i < vec.size(); i++){
-    //     //std::cout << jnt->_name << " : " << weightList[i][jnt->_name] << std::endl;
-    //     if(weightList[i][jnt->_name] != 0){
-    //         vec[i].position += weightList[i][jnt->_name] * transform * vec[i].position;
-    //     }
-    // }
 
     if(!(jnt->_children.empty())){
         for(Joint *child : jnt->_children){
@@ -192,7 +178,7 @@ void GeometryEngine::setWeights(std::vector<VertexData> vec){
             }
         }
         weights[closestJoint] = 1.0;
-        std::cout << "JOINT : " << closestJoint << " DIST : " << closestDist << std::endl;
+        // std::cout << "JOINT : " << closestJoint << " DIST : " << closestDist << std::endl;
         weightList.push_back(weights);
     }
 }
@@ -217,7 +203,6 @@ void GeometryEngine::parseWeights(std::string fileName){
             std::unordered_map<std::string, float> weights;
             for(int i = 1 ; i < tokens.size() ; i++){
                 weights[ids[i-1]] = stof(tokens[i]);
-                std::cout << "WEIGHT : " << ids[i-1] << std::endl;
             }
             weightList.push_back(weights);
         }
@@ -242,6 +227,14 @@ void GeometryEngine::setIndexes(Joint *jnt, std::vector<GLushort> *vec){
         }
     }
 }
+
+// std::vector<double> GeometryEngine::getScales(){
+//     //moyennes xyz puis ecart moyen a la moyenne (absolu) 
+//     std::vector<double> max;
+//     for (Joint j : jntVec){
+//         for ()
+//     }
+// }
 
 void GeometryEngine::initLineGeometry(Joint *root)
 {
@@ -290,17 +283,16 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     }
     skinPosCopy = newPos;
 
-    setWeights(p.first);
-    // std::vector<VertexData> tmpSkinPos(skinPos);
-    // skinPosCopy = tmpSkinPos;
-    
-    // p.first = newPos;
-    // skinPos = p.first;
-    // //setWeights(skinPos);
     // parseWeights("../weights.txt");
-    // //qDebug() << skinPos[0].position;
-    // std::vector<VertexData> tmpSkinPos(skinPos);
-    // skinPosCopy = tmpSkinPos;
+    setWeights(skinPosCopy);
+
+    for(Joint * jnt : jntVec){
+        //transform back to 0 0 0
+        *(jnt->_restTransform) *= root->_transform->inverted();
+        // invert
+        *(jnt->_restTransform) = jnt->_restTransform->inverted();
+
+    }
     
     VertexData *vertices = &(p.first[0]);
     GLushort *indices = &(p.second[0]);
@@ -329,14 +321,7 @@ void GeometryEngine::updatePos(Joint *root){
     arrayBuf.allocate(vertices, lenVec * sizeof(VertexData));
 }
 
-void GeometryEngine::resetSkinPos(){
-    std::vector<VertexData> tmpSkinPos(skinPosCopy);
-    skinPos = tmpSkinPos;
-}
-
 void GeometryEngine::updateSkinPos(Joint *root){
-    // resetSkinPos();
-
     for (int i = 0; i< skinPosCopy.size(); i++){
         skinPosCopy[i].position = QVector3D(0, 0, 0);
     }
