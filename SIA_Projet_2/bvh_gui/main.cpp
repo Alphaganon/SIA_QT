@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
     app.setApplicationName("Tpose");
     app.setApplicationVersion("0.1");
 #ifndef QT_NO_OPENGL
-    std::string fileName = "walkSit.bvh";
-    MainWidget* widget = new MainWidget(fileName);
+    std::string fileName = "walk2.bvh";
+    MainWidget* widget = new MainWidget(fileName, argc, argv);
     widget->show();
 #else
     QLabel note("OpenGL Support required");

@@ -8,7 +8,13 @@
 
 #include <cmath>
 
-MainWidget::MainWidget(std::string filename) {
+MainWidget::MainWidget(std::string filename, int argc, char *argv[]) {
+    if (argc > 1 && strcmp(argv[1], "-s") == 0){
+        skin = false;
+    }
+    else{
+        skin = true;
+    }
     std::pair<std::pair<Joint*, std::vector<Joint*>>, std::pair<int, double>> data = Joint::createFromFile(filename);
     root = data.first.first;
     jntVec = data.first.second;
@@ -109,7 +115,7 @@ void MainWidget::initializeGL()
     glEnable(GL_CULL_FACE);
 //! [2]
 
-    geometries = new GeometryEngine(root, jntVec);
+    geometries = new GeometryEngine(root, jntVec, skin);
 
     // Use QBasicTimer because its faster than QTimer
     timer.start(0, this);
@@ -193,8 +199,12 @@ void MainWidget::paintGL()
 
     // Draw cube geometry
     //geometries->drawCubeGeometry(&program);
-    //geometries->drawLineGeometry(&program);
-    geometries->drawSkinGeometry(&program);
+    if (skin){
+        geometries->drawSkinGeometry(&program);
+    }
+    else{
+        geometries->drawLineGeometry(&program);
+    }
 }
 
 void MainWidget::motionEvent(QTimerEvent* e) {
@@ -203,8 +213,12 @@ void MainWidget::motionEvent(QTimerEvent* e) {
     if (elapsed.count()/interval >= currFrame + 1){
         std::cout << currFrame << std::endl;
         root->animate(currFrame);
-        // geometries->updatePos(root);
-        geometries->updateSkinPos(root);
+        if (skin){
+            geometries->updateSkinPos(root);
+        }
+        else{
+            geometries->updatePos(root);
+        }
         currFrame++;
         update();
         if (currFrame>=nFrames) {

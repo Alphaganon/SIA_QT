@@ -28,13 +28,14 @@ class MainWidget : public QOpenGLWidget, protected QOpenGLFunctions
 public:
     using QOpenGLWidget::QOpenGLWidget;
     ~MainWidget();
-    MainWidget(std::string filename);
+    MainWidget(std::string filename, int argc, char *argv[]);
 
     Joint *root;
     std::vector<Joint*> jntVec;
     int nFrames;
     int currFrame;
     double interval;
+    bool skin;
     std::chrono::high_resolution_clock::time_point startTime;
     QTimer* motionTimer;
 

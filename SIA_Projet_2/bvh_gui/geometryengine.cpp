@@ -9,7 +9,7 @@
 #include <QVector4D>
 
 //! [0]
-GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec)
+GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec, bool skin)
     : indexBuf(QOpenGLBuffer::IndexBuffer)
 {
     initializeOpenGLFunctions();
@@ -19,10 +19,15 @@ GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec)
     indexBuf.create();
 
     // Initializes cube geometry and transfers it to VBOs
-    //initCubeGeometry();
-    //initLineGeometry(root);
+    this->skin = skin;
     this->jntVec = jntVec;
-    initSkinGeometry(root);
+    if (skin){
+        initSkinGeometry(root);
+    }
+    else{
+        initLineGeometry(root);
+    }
+    //initCubeGeometry();
 }
 
 GeometryEngine::~GeometryEngine()
@@ -192,7 +197,7 @@ void GeometryEngine::parseWeights(std::string fileName){
             std::setlocale(LC_ALL, "en_US.UTF-8");
             std::string buf;
 			std::getline(inputfile, buf);
-            std::vector<std::string> tokens = multiParser(buf, " \t\r");
+            std::vector<std::string> tokens = multiParser(buf, " \t\r\n");
             if(!idsFound){
                 for(int i = 1 ; i < tokens.size() ; i++){
                     ids.push_back(tokens[i]);
@@ -283,8 +288,8 @@ void GeometryEngine::initSkinGeometry(Joint *root)
     }
     skinPosCopy = newPos;
 
-    // parseWeights("../weights.txt");
-    setWeights(skinPosCopy);
+    parseWeights("../weights.txt");
+    // setWeights(skinPosCopy);
 
     for(Joint * jnt : jntVec){
         //transform back to 0 0 0

@@ -15,7 +15,7 @@
 class GeometryEngine : protected QOpenGLFunctions
 {
 public:
-    GeometryEngine(Joint *root, std::vector<Joint*> jntVec);
+    GeometryEngine(Joint *root, std::vector<Joint*> jntVec, bool skin);
     virtual ~GeometryEngine();
 
     void drawCubeGeometry(QOpenGLShaderProgram *program);
@@ -45,6 +45,7 @@ private:
 
     QOpenGLBuffer arrayBuf;
     QOpenGLBuffer indexBuf;
+    bool skin;
 };
 
 #endif // GEOMETRYENGINE_H
