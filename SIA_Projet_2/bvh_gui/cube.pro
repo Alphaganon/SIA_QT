@@ -10,14 +10,16 @@ SOURCES += \
     geometryengine.cpp \
     ../joint.cpp \
     ../super_parser.cpp \
-    ui/ui_main_widget.cpp
+    ui/ui_main_widget.cpp \
+    ui/bvh_import_wizard.cpp
 
 HEADERS += \
     mainwidget.h \
     geometryengine.h \
     ../joint.h \
     ../super_parser.h \
-    ui/ui_main_widget.h
+    ui/ui_main_widget.h \
+    ui/bvh_import_wizard.h
 
 
 RESOURCES += \
