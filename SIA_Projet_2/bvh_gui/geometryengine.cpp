@@ -19,9 +19,9 @@ GeometryEngine::GeometryEngine(Joint *root, std::vector<Joint*> jntVec)
 
     // Initializes cube geometry and transfers it to VBOs
     //initCubeGeometry();
-    // initLineGeometry(root);
+    initLineGeometry(root);
     this->jntVec = jntVec;
-    initSkinGeometry(root);
+    //initSkinGeometry(root);
 }
 
 GeometryEngine::~GeometryEngine()

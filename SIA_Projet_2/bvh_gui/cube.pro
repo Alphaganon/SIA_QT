@@ -9,13 +9,16 @@ SOURCES += \
     mainwidget.cpp \
     geometryengine.cpp \
     ../joint.cpp \
-    ../super_parser.cpp
+    ../super_parser.cpp \
+    ui/ui_main_widget.cpp
 
 HEADERS += \
     mainwidget.h \
     geometryengine.h \
     ../joint.h \
-    ../super_parser.h
+    ../super_parser.h \
+    ui/ui_main_widget.h
+
 
 RESOURCES += \
     shaders.qrc \

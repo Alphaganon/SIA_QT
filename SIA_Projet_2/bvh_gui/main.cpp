@@ -5,11 +5,15 @@
 #include <QLabel>
 #include <QSurfaceFormat>
 #include <utility>
+#include <QWidget>
+#include <QHBoxLayout>
+#include <QLabel>
 
 #include "../joint.h"
 
 #ifndef QT_NO_OPENGL
 #include "mainwidget.h"
+#include "ui/ui_main_widget.h"
 #endif
 
 int main(int argc, char *argv[])
@@ -23,9 +27,8 @@ int main(int argc, char *argv[])
     app.setApplicationName("Tpose");
     app.setApplicationVersion("0.1");
 #ifndef QT_NO_OPENGL
-    std::string fileName = "walk1.bvh";
-    MainWidget* widget = new MainWidget(fileName);
-    widget->show();
+    UIMainWidget* main = new UIMainWidget("walk1.bvh");
+    main->show();
 #else
     QLabel note("OpenGL Support required");
     note.show();
