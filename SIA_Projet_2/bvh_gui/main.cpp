@@ -13,7 +13,7 @@
 
 #ifndef QT_NO_OPENGL
 #include "mainwidget.h"
-#include "ui/ui_main_widget.h"
+#include "ui.h"
 #endif
 
 int main(int argc, char *argv[])
@@ -28,7 +28,8 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.1");
 #ifndef QT_NO_OPENGL
     UIMainWidget* main = new UIMainWidget("walk1.bvh");
-    main->show();
+    //MainWidget* main = new MainWidget("walk1.bvh");
+    main->displayWidget();
 #else
     QLabel note("OpenGL Support required");
     note.show();

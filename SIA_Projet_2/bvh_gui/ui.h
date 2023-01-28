@@ -1,3 +1,10 @@
+#include <QWidget>
+#include <QPushButton>
+#include <string>
+#include <QObject>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <iostream>
 #include <QWizard>
 #include <QWizardPage>
 #include <string>
@@ -10,12 +17,15 @@
 #include <QLineEdit>
 #include <QPushButton>
 
+#include "mainwidget.h"
+
 class BVHImportWizard : public QWizard {
     Q_OBJECT
     public:
         BVHImportWizard(QWidget* parent = nullptr);
         ~BVHImportWizard(){};
         std::string importedPath;
+        QWidget* relatedWidget;
 
 
     public slots:
@@ -45,4 +55,23 @@ class ImportPage : public QWizardPage {
     public:
         ImportPage(QWidget* parent= nullptr);
         QLabel* label;
+};
+
+class UIMainWidget : public QWidget {
+    Q_OBJECT
+    public:
+        QPushButton* panel;
+        QPushButton* quoi;
+        QPushButton* importButton;
+        MainWidget* window;
+        UIMainWidget(std::string filename);
+        ~UIMainWidget(){};
+        BVHImportWizard* importer;
+        void displayWidget();
+        std::string path;
+
+    public slots:
+        void resetAnimation();
+        void feur();
+        void callWizard();
 };
