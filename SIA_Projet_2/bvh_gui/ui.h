@@ -16,6 +16,9 @@
 #include <QGridLayout>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QFileDialog>
+#include <QDir>
+#include <QString>
 
 #include "mainwidget.h"
 
@@ -55,7 +58,9 @@ class ImportPage : public QWizardPage {
     public:
         ImportPage(QWidget* parent= nullptr);
         QLabel* label;
+
 };
+
 
 class UIMainWidget : public QWidget {
     Q_OBJECT
@@ -69,9 +74,12 @@ class UIMainWidget : public QWidget {
         BVHImportWizard* importer;
         void displayWidget();
         std::string path;
+        QPushButton* pauseButton;
+        QPushButton* restartButton;
 
     public slots:
         void resetAnimation();
         void feur();
         void callWizard();
+        void pauseAnimation();
 };
